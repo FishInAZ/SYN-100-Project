@@ -7,24 +7,24 @@ app.secret_key = 'your_secret_key_here'  # Replace with a secure key in producti
 # Custom Avalon roles
 ROLES = {
     'good': [
-        "National Parks Conservation Association",
-        "U.S. Environmental Protection Agency",
-        "U.S. Forest Service",
-        "American Hiking Society",
-        "National Park Service",
-        "The Nature Conservancy",
-        "Bureau of Land Management",
-        "Travelers",
-        "Tourist (Good)"
+        "National Parks Conservation Association",  # Equivalent to Merlin
+        "U.S. Environmental Protection Agency",     # Equivalent to Percival
+        "U.S. Forest Service",                      # Equivalent to a Loyal Servant of Arthur
+        "American Hiking Society",                  # Equivalent to a Loyal Servant of Arthur
+        "National Park Service",                    # Equivalent to a Loyal Servant of Arthur
+        "The Nature Conservancy",                   # Equivalent to a Loyal Servant of Arthur
+        "Bureau of Land Management",                # Equivalent to a Loyal Servant of Arthur
+        "Travelers",                                # Equivalent to a Loyal Servant of Arthur
+        "Tourist (Good)"                            # Equivalent to a Loyal Servant of Arthur
     ],
     'evil': [
-        "ExxonMobil",
-        "Peabody Energy",
-        "Nestle",
-        "ConocoPhillips",
-        "Freeport-McMoRan",
-        "Chevron",
-        "Tourist (Evil)"
+        "ExxonMobil",                               # Equivalent to Assassin
+        "Peabody Energy",                           # Equivalent to Morgana
+        "Nestle",                                   # Equivalent to Mordred
+        "ConocoPhillips",                           # Equivalent to Oberon
+        "Freeport-McMoRan",                         # Equivalent to Minion of Mordred
+        "Chevron",                                  # Equivalent to Minion of Mordred
+        "Tourist (Evil)"                            # Equivalent to Minion of Mordred
     ]
 }
 
@@ -47,7 +47,22 @@ def assign_roles():
     if not players:
         all_roles = ROLES['good'] + ROLES['evil']
         random.shuffle(all_roles)
-        session['players'] = all_roles[:num_players]
+        assigned_roles = all_roles[:num_players]
+
+        # Assign roles ensuring game balance (similar to Avalon)
+        good_count = 0
+        evil_count = 0
+        for role in assigned_roles:
+            if role in ROLES['good']:
+                good_count += 1
+            else:
+                evil_count += 1
+
+        # Ensure there is at least Merlin, Percival, and the Assassin
+        if good_count < 3 or evil_count < 2:
+            return redirect(url_for('create_game'))
+
+        session['players'] = assigned_roles
 
     return render_template('assign_roles.html', players=session['players'])
 
