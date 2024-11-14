@@ -2,13 +2,219 @@
 <html>
 <head>
     <title>Green Detective Game</title>
+    <style>
+        /* Basic styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('1.jpg'); /* 引用背景图片 */
+            background-size: contain; /* 图片完整显示，不裁剪 */
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #333; /* 使用更深颜色以便在白色背景上可读 */
+            margin: 0;
+            padding: 20px; /* 增加页面边距 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Adjust the main container to center content and add whitespace */
+        .content-container {
+            background-color: rgba(255, 255, 255, 0.9); /* 半透明白色背景增强可读性 */
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 增加阴影效果 */
+        }
+
+        h1 {
+            color: #4CAF50; /* 绿色主题颜色 */
+            font-size: 36px;
+            margin-top: 0;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Styling for the Create Room button */
+        .create-room-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        /* Info button styling */
+        .info-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ffcc00;
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 40px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal background */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            text-align: left;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Form styling inside the modal */
+        .modal-content label,
+        .modal-content input,
+        .modal-content select,
+        .modal-content button {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .modal-content button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Green Detective Game!</h1>
-    <form action="/create_game" method="POST">
-        <label for="num_players">Number of Players (5-10):</label>
-        <input type="number" id="num_players" name="num_players" min="5" max="10" required>
-        <button type="submit">Create Game</button>
-    </form>
+    <!-- Info button -->
+    <div class="info-button" onclick="openInfoModal()">!</div>
+
+    <!-- Main content container -->
+    <div class="content-container">
+        <h1>Welcome to Green Detective!</h1>
+        <p>Explore how corporations impact the environment, particularly national parks, and learn how you can help protect them. Engage with friends in a fun and educational game to discover the truth behind environmental issues.</p>
+        <button class="create-room-btn" onclick="openModal()">CREATE ROOM</button>
+    </div>
+
+    <!-- Game Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeInfoModal()">&times;</span>
+            <h2>Game Instructions & Commitment</h2>
+            <p><strong>Welcome to Green Detective!</strong> In this game, you will explore the impact of corporations on the environment, specifically focusing on national parks and how you can help protect them.</p>
+            <p><strong>Game Objective:</strong> Engage with friends and family in a fun, educational experience that raises awareness about environmental issues and teaches ways to minimize harmful impacts on nature.</p>
+            <p><strong>Player Commitment:</strong> By participating in Green Detective, players commit to respecting the game's purpose and intent. This game is designed to promote understanding and responsibility toward environmental conservation. Please play with integrity and respect for all players.</p>
+            <p><strong>Important:</strong> Green Detective is for educational and entertainment purposes only. It does not provide real environmental data but uses fictional scenarios inspired by real-world issues. We encourage players to apply what they learn to make a positive impact on their communities.</p>
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="createRoomModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Enter Details for Green Detective</h2>
+            <form action="/create_game" method="POST">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your detective name">
+                
+                <label for="language">Language</label>
+                <select id="language" name="language">
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                </select>
+                
+                <label for="color_theme">Color Theme</label>
+                <select id="color_theme" name="color_theme">
+                    <option value="green">Green Theme</option>
+                    <option value="light">Light Theme</option>
+                    <option value="dark">Dark Theme</option>
+                </select>
+                
+                <button type="submit">Start Investigation</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to open the create room modal
+        function openModal() {
+            document.getElementById("createRoomModal").style.display = "block";
+        }
+
+        // Function to close the create room modal
+        function closeModal() {
+            document.getElementById("createRoomModal").style.display = "none";
+        }
+
+        // Function to open the info modal
+        function openInfoModal() {
+            document.getElementById("infoModal").style.display = "block";
+        }
+
+        // Function to close the info modal
+        function closeInfoModal() {
+            document.getElementById("infoModal").style.display = "none";
+        }
+
+        // Close the modal if the user clicks outside of it
+        window.onclick = function(event) {
+            const infoModal = document.getElementById("infoModal");
+            const createRoomModal = document.getElementById("createRoomModal");
+            if (event.target == infoModal) {
+                infoModal.style.display = "none";
+            }
+            if (event.target == createRoomModal) {
+                createRoomModal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
+
