@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Lobby</title>
+</head>
+<body>
+    <h1>Game Lobby</h1>
+    <p>Game ID: {{ game_id }}</p>
+    <h2>Players Joined:</h2>
+    <ul>
+        {% for player in players %}
+        <li>{{ player.name }}</li>
+        {% endfor %}
+    </ul>
+    {% if players|length < session.num_players %}
+    <form action="/join_game" method="POST">
+        <label for="player_name">Enter Your Name:</label>
+        <input type="text" id="player_name" name="player_name" required>
+        <button type="submit">Join Game</button>
+    </form>
+    {% else %}
+    <form action="/assign_roles" method="GET">
+        <button type="submit">Assign Roles and Start Game</button>
+    </form>
+    {% endif %}
+</body>
+</html>

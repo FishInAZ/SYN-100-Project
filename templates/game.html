@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    <script>
+        function proposeTeam() {
+            const team = document.getElementById("teamInput").value.split(",").map(item => item.trim());
+            fetch("/propose_team", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ team: team })
+            }).then(response => response.json()).then(data => {
+                alert("Team proposed: " + data.team.join(", "));
+            });
+        }
+
+        function voteTeam(vote) {
+            fetch("/vote_team", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ vote: vote })
+            }).then(response => response.json()).then(data => {
+                alert("Vote submitted: " + vote);
+            });
+        }
+
+        function submitMissionResult(result) {
+            fetch("/mission_result", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ result: result })
+            }).then(response => response.json()).then(data => {
+                alert("Mission result submitted. Next mission: " + data.next_mission);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Game On!</h1>
+    <h2>Welcome, {{ player.name }}!</h2>
+    <p>Your role: {{ player.role }}</p>
+
+    <h3>Current Mission: {{ game_state.current_mission }}</h3>
+
+    <h3>Propose a Team</h3>
+    <input type="text" id="teamInput" placeholder="Enter player IDs separated by commas">
+    <button onclick="proposeTeam()">Propose Team</button>
+
+    <h3>Vote on Proposed Team</h3>
+    <button onclick="voteTeam('approve')">Approve</button>
+    <button onclick="voteTeam('reject')">Reject</button>
+
+    <h3>Submit Mission Result</h3>
+    <button onclick="submitMissionResult('pass')">Pass</button>
+    <button onclick="submitMissionResult('fail')">Fail</button>
+</body>
+</html>
