@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Lobby</title>
+    <style>
+        /* Center the main container */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('download.jpg'); /* 替换为背景图片的路径 */
+            background-size: cover; /* 确保图片覆盖整个页面 */
+            background-repeat: no-repeat; /* 禁止背景重复 */
+            background-position: center; /* 将图片居中 */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Container for the image and content */
+        .circle-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(51, 51, 51, 0.8); /* 半透明背景色 */
+        }
+
+        /* Content on top of the image */
+        .content {
+            position: relative;
+            color: white;
+            text-align: center;
+            z-index: 1;
+            padding: 10px;
+        }
+
+        .content h1 {
+            font-size: 24px;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        .content p, .content h2, .content form {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        /* Player avatar container */
+        .player-avatar {
+            position: absolute;
+            width: 60px;
+            height: 80px; /* 增加高度以容纳名字 */
+            display: flex;
+            flex-direction: column; /* 垂直排列 */
+            align-items: center;
+            justify-content: flex-end; /* 名字在上方 */
+        }
+
+        /* Avatar background (tree image) */
+        .player-avatar .avatar-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-image: url('tree.jpeg'); /* 替换为树的图片路径 */
+            background-size: cover;
+            background-position: center;
+            border: 2px solid white;
+        }
+
+        /* Player name styling */
+        .player-avatar .player-name {
+            font-size: 12px;
+            color: white;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="circle-container" id="gameTable">
+        <div class="content">
+            <h1>Game Lobby</h1>
+            <p>Game ID: 12345</p>
+            <h2>Players Joined:</h2>
+            <form id="joinForm">
+                <label for="player_name">Enter Your Name:</label>
+                <input type="text" id="player_name" name="player_name" required>
+                <button type="submit">Join Game</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('joinForm');
+        const gameTable = document.getElementById('gameTable');
+        let players = []; // 保存玩家信息
+        const radius = 150; // 半径
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // 阻止表单默认提交
+
+            const playerName = document.getElementById('player_name').value.trim();
+            if (!playerName) {
+                alert('Please enter a valid name!');
+                return;
+            }
+
+            // 创建玩家头像容器
+            const playerAvatar = document.createElement('div');
+            playerAvatar.classList.add('player-avatar');
+
+            // 创建玩家名字
+            const playerNameElement = document.createElement('div');
+            playerNameElement.classList.add('player-name');
+            playerNameElement.innerText = playerName;
+
+            // 创建玩家头像（小树图片）
+            const avatarImage = document.createElement('div');
+            avatarImage.classList.add('avatar-image');
+
+            // 组装头像容器
+            playerAvatar.appendChild(playerNameElement);
+            playerAvatar.appendChild(avatarImage);
+
+            // 添加到圆桌
+            gameTable.appendChild(playerAvatar);
+
+            // 添加玩家到数组
+            players.push(playerAvatar);
+
+            // 清空输入框
+            document.getElementById('player_name').value = '';
+
+            // 重新布局头像
+            updatePlayerPositions();
+        });
+
+        function updatePlayerPositions() {
+            const angleStep = (2 * Math.PI) / players.length; // 平均分配角度
+            players.forEach((player, index) => {
+                const angle = index * angleStep; // 计算每个玩家的角度
+                const x = radius * Math.cos(angle); // 计算 x 坐标
+                const y = radius * Math.sin(angle); // 计算 y 坐标
+                player.style.transform = `translate(${x}px, ${y}px)`; // 设置位置
+            });
+        }
+    </script>
+</body>
+</html>
