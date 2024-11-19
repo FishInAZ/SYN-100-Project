@@ -63,7 +63,7 @@
         .player-avatar {
             position: absolute;
             width: 60px;
-            height: 80px; /* 增加高度以容纳名字 */
+            height: 100px; /* 增加高度以容纳名字和角色 */
             display: flex;
             flex-direction: column; /* 垂直排列 */
             align-items: center;
@@ -89,6 +89,14 @@
             text-align: center;
             margin-bottom: 5px;
             z-index: 3; /* 确保名字与头像一同位于最上层 */
+        }
+
+        /* Player role styling */
+        .player-role {
+            font-size: 12px;
+            color: yellow;
+            text-align: center;
+            margin-top: 5px;
         }
 
         /* Start Game Button */
@@ -123,82 +131,7 @@
             <div class="error-message" id="errorMessage"></div>
         </div>
     </div>
-
-    <script>
-        const form = document.getElementById('joinForm');
-        const startGameBtn = document.getElementById('startGameBtn');
-        const errorMessage = document.getElementById('errorMessage');
-        const gameTable = document.getElementById('gameTable');
-        let players = []; // 保存玩家信息
-        const radius = 150; // 半径
-        const requiredPlayers = 5; // 要求的玩家人数
-
-        form.addEventListener('submit', function (event) {
-            event.preventDefault(); // 阻止表单默认提交
-
-            const playerName = document.getElementById('player_name').value.trim();
-            if (!playerName) {
-                alert('Please enter a valid name!');
-                return;
-            }
-
-            if (players.length >= requiredPlayers) {
-                errorMessage.style.display = 'block';
-                errorMessage.innerText = `Cannot add more than ${requiredPlayers} players.`;
-                return;
-            }
-
-            // 创建玩家头像容器
-            const playerAvatar = document.createElement('div');
-            playerAvatar.classList.add('player-avatar');
-
-            // 创建玩家名字
-            const playerNameElement = document.createElement('div');
-            playerNameElement.classList.add('player-name');
-            playerNameElement.innerText = playerName;
-
-            // 创建玩家头像（小树图片）
-            const avatarImage = document.createElement('div');
-            avatarImage.classList.add('avatar-image');
-
-            // 组装头像容器
-            playerAvatar.appendChild(playerNameElement);
-            playerAvatar.appendChild(avatarImage);
-
-            // 添加到圆桌
-            gameTable.appendChild(playerAvatar);
-
-            // 添加玩家到数组
-            players.push(playerAvatar);
-
-            // 清空输入框
-            document.getElementById('player_name').value = '';
-
-            // 隐藏错误消息
-            errorMessage.style.display = 'none';
-
-            // 重新布局头像
-            updatePlayerPositions();
-        });
-
-        startGameBtn.addEventListener('click', function () {
-            if (players.length === requiredPlayers) {
-                alert('Game Starting!');
-            } else {
-                errorMessage.style.display = 'block';
-                errorMessage.innerText = `Game cannot start. Exactly ${requiredPlayers} players are required.`;
-            }
-        });
-
-        function updatePlayerPositions() {
-            const angleStep = (2 * Math.PI) / players.length; // 平均分配角度
-            players.forEach((player, index) => {
-                const angle = index * angleStep; // 计算每个玩家的角度
-                const x = radius * Math.cos(angle); // 计算 x 坐标
-                const y = radius * Math.sin(angle); // 计算 y 坐标
-                player.style.transform = `translate(${x}px, ${y}px)`; // 设置位置
-            });
-        }
-    </script>
+    <!-- 引入外部的 JavaScript 文件 -->
+    <script src="table.js"></script>
 </body>
 </html>
