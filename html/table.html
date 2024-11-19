@@ -23,19 +23,20 @@
             width: 350px;
             height: 350px;
             border-radius: 50%;
-            overflow: hidden;
+            overflow: visible; /* 确保子元素不会被容器裁剪 */
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: rgba(51, 51, 51, 0.8); /* 半透明背景色 */
+            z-index: 1; /* 确保圆形容器在较低层级 */
         }
 
-        /* Content on top of the image */
+        /* Content inside the circle */
         .content {
             position: relative;
             color: white;
             text-align: center;
-            z-index: 1;
+            z-index: 2; /* 确保表单和文字在圆形容器内部 */
             padding: 10px;
         }
 
@@ -50,6 +51,14 @@
             font-size: 16px;
         }
 
+        /* Error message styling */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
         /* Player avatar container */
         .player-avatar {
             position: absolute;
@@ -59,6 +68,7 @@
             flex-direction: column; /* 垂直排列 */
             align-items: center;
             justify-content: flex-end; /* 名字在上方 */
+            z-index: 3; /* 确保头像和名字位于最上层 */
         }
 
         /* Avatar background (tree image) */
@@ -78,6 +88,23 @@
             color: white;
             text-align: center;
             margin-bottom: 5px;
+            z-index: 3; /* 确保名字与头像一同位于最上层 */
+        }
+
+        /* Start Game Button */
+        .start-game-btn {
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .start-game-btn:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -92,14 +119,19 @@
                 <input type="text" id="player_name" name="player_name" required>
                 <button type="submit">Join Game</button>
             </form>
+            <button class="start-game-btn" id="startGameBtn">Start Game</button>
+            <div class="error-message" id="errorMessage"></div>
         </div>
     </div>
 
     <script>
         const form = document.getElementById('joinForm');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const errorMessage = document.getElementById('errorMessage');
         const gameTable = document.getElementById('gameTable');
         let players = []; // 保存玩家信息
         const radius = 150; // 半径
+        const requiredPlayers = 5; // 要求的玩家人数
 
         form.addEventListener('submit', function (event) {
             event.preventDefault(); // 阻止表单默认提交
@@ -107,6 +139,12 @@
             const playerName = document.getElementById('player_name').value.trim();
             if (!playerName) {
                 alert('Please enter a valid name!');
+                return;
+            }
+
+            if (players.length >= requiredPlayers) {
+                errorMessage.style.display = 'block';
+                errorMessage.innerText = `Cannot add more than ${requiredPlayers} players.`;
                 return;
             }
 
@@ -136,8 +174,20 @@
             // 清空输入框
             document.getElementById('player_name').value = '';
 
+            // 隐藏错误消息
+            errorMessage.style.display = 'none';
+
             // 重新布局头像
             updatePlayerPositions();
+        });
+
+        startGameBtn.addEventListener('click', function () {
+            if (players.length === requiredPlayers) {
+                alert('Game Starting!');
+            } else {
+                errorMessage.style.display = 'block';
+                errorMessage.innerText = `Game cannot start. Exactly ${requiredPlayers} players are required.`;
+            }
         });
 
         function updatePlayerPositions() {
