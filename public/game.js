@@ -42,18 +42,3 @@ export default function handler(req, res) {
         res.status(405).json({ error: 'Method not allowed.' });
     }
 }
-
-function assignRoles(players) {
-    if (players.length > roles.length) {
-        throw new Error("Not enough roles for all players.");
-    }
-
-    const shuffledRoles = [...roles].sort(() => Math.random() - 0.5); // Shuffle roles
-    const assignedRoles = {};
-
-    players.forEach((player, index) => {
-        assignedRoles[player] = shuffledRoles[index];
-    });
-
-    return assignedRoles;
-}
