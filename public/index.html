@@ -168,32 +168,43 @@
         </div>
     </div>
 
-    <!-- Create Room Modal -->
-    <div id="createRoomModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Enter Details for Green Detective</h2>
-            <form action="/create_game" method="POST">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Enter your detective name">
-                
+<!-- Create Room Modal -->
+<div id="createRoomModal" class="modal">
+    <div class="modal-content">
+        <!-- Close Button -->
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <!-- Modal Header -->
+        <h2>Enter Details for Green Detective</h2>
+
+        <!-- Form for Room Details -->
+        <form onsubmit="navigateToTable(event)">
+            <!-- Language Selection -->
+            <div class="form-group">
                 <label for="language">Language</label>
                 <select id="language" name="language">
                     <option value="English">English</option>
                     <option value="Spanish">Spanish</option>
                 </select>
-                
+            </div>
+
+            <!-- Color Theme Selection -->
+            <div class="form-group">
                 <label for="color_theme">Color Theme</label>
                 <select id="color_theme" name="color_theme">
                     <option value="green">Green Theme</option>
                     <option value="light">Light Theme</option>
                     <option value="dark">Dark Theme</option>
                 </select>
-                
-                <button type="submit" onclick="navigateToTable()">Start Investigation</button>
-            </form>
-        </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                <button type="submit">Start Investigation</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <script>
         // Function to open the create room modal

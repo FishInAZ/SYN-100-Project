@@ -119,9 +119,24 @@ window.onclick = function (event) {
 };
 
 // Function to navigate to table.html
-function navigateToTable() {
+function navigateToTable(event) {
+    // Prevent default form submission
+    event.preventDefault();
+
+    // Capture form data (if needed for further processing)
+    const language = document.getElementById("language").value;
+    const colorTheme = document.getElementById("color_theme").value;
+
+    // Debugging: Log selected values (optional)
+    console.log("Language:", language, "Color Theme:", colorTheme);
+
+    // Redirect to table.html
     window.location.href = "table.html";
 }
+
+// Attach event listener to the form
+document.getElementById("createRoomForm").addEventListener("submit", navigateToTable);
+
 
 // Initialize WebSocket connection
 initializeWebSocket();

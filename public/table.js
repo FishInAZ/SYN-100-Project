@@ -1,35 +1,58 @@
 // table.js
 
-// Array to hold player data
 let players = [];
 const radius = 150; // Radius for positioning avatars in a circle
+let ws; // WebSocket connection
 
 // Get HTML elements
-const form = document.getElementById('joinForm');
-const gameTable = document.getElementById('gameTable');
+const form = document.getElementById("joinForm");
+const gameTable = document.getElementById("gameTable");
+const playerNameInput = document.getElementById("player_name");
 
-// Event listener for the join form submission
-form.addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent default form submission behavior
+// Initialize WebSocket connection
+function initializeWebSocket() {
+    ws = new WebSocket("wss://<your-vercel-domain>/api/realtime");
 
-    const playerName = document.getElementById('player_name').value.trim();
-    if (!playerName) {
-        alert('Please enter a valid name!');
-        return;
+    ws.onopen = () => {
+        console.log("WebSocket connection established.");
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+    };
+}
+
+// Handle incoming WebSocket messages
+function handleWebSocketMessage(data) {
+    if (data.type === "userJoined") {
+        addPlayerToTable(data.payload.name, false); // Add a player without sending another message
+    } else if (data.type === "roomUpdate") {
+        updatePlayerList(data.payload.users);
     }
+}
+
+// Add player to the table
+function addPlayerToTable(playerName, notifyServer = true) {
+    // Check if player already exists
+    if (players.find((player) => player.name === playerName)) return;
 
     // Create player avatar container
-    const playerAvatar = document.createElement('div');
-    playerAvatar.classList.add('player-avatar');
+    const playerAvatar = document.createElement("div");
+    playerAvatar.classList.add("player-avatar");
 
     // Create player name element
-    const playerNameElement = document.createElement('div');
-    playerNameElement.classList.add('player-name');
+    const playerNameElement = document.createElement("div");
+    playerNameElement.classList.add("player-name");
     playerNameElement.innerText = playerName;
 
     // Create player avatar image (tree image)
-    const avatarImage = document.createElement('div');
-    avatarImage.classList.add('avatar-image');
+    const avatarImage = document.createElement("div");
+    avatarImage.classList.add("avatar-image");
 
     // Assemble player avatar container
     playerAvatar.appendChild(playerNameElement);
@@ -39,37 +62,60 @@ form.addEventListener('submit', function (event) {
     gameTable.appendChild(playerAvatar);
 
     // Add player to the players array
-    players.push(playerAvatar);
-
-    // Clear input field
-    document.getElementById('player_name').value = '';
+    players.push({ name: playerName, element: playerAvatar });
 
     // Update avatar positions around the game table
     updatePlayerPositions();
-});
 
-// Function to update player positions around the game table
+    // Notify the server about the new player
+    if (notifyServer && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(
+            JSON.stringify({
+                type: "joinRoom",
+                payload: { room: "defaultRoom", name: playerName },
+            })
+        );
+    }
+}
+
+// Update player positions around the game table
 function updatePlayerPositions() {
     const angleStep = (2 * Math.PI) / players.length; // Divide the circle evenly for each player
     players.forEach((player, index) => {
         const angle = index * angleStep; // Calculate angle for each player
         const x = radius * Math.cos(angle); // Calculate x-coordinate
         const y = radius * Math.sin(angle); // Calculate y-coordinate
-        player.style.transform = `translate(${x}px, ${y}px)`; // Apply position with CSS transform
+        player.element.style.transform = `translate(${x}px, ${y}px)`; // Apply position with CSS transform
     });
 }
 
-// Function to remove a player (if needed in the future)
-function removePlayer(playerName) {
-    const playerIndex = players.findIndex(player => player.querySelector('.player-name').innerText === playerName);
-    if (playerIndex !== -1) {
-        // Remove player from the DOM and array
-        gameTable.removeChild(players[playerIndex]);
-        players.splice(playerIndex, 1);
-        // Update player positions after removal
-        updatePlayerPositions();
-    }
+// Update player list based on WebSocket message
+function updatePlayerList(userList) {
+    // Remove all players from the game table
+    players.forEach((player) => {
+        gameTable.removeChild(player.element);
+    });
+    players = [];
+
+    // Add players back to the table from the updated list
+    userList.forEach((playerName) => {
+        addPlayerToTable(playerName, false);
+    });
 }
 
-// Example usage of removePlayer function (for future use or development)
-// removePlayer('PlayerName');
+// Event listener for the join form submission
+form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission behavior
+
+    const playerName = playerNameInput.value.trim();
+    if (!playerName) {
+        alert("Please enter a valid name!");
+        return;
+    }
+
+    addPlayerToTable(playerName); // Add player to the table
+    playerNameInput.value = ""; // Clear input field
+});
+
+// Initialize WebSocket connection when the script loads
+initializeWebSocket();
