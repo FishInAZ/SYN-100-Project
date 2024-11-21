@@ -8,45 +8,55 @@
             fetch("/propose_team", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ team: team })
-            }).then(response => response.json()).then(data => {
-                alert("Team proposed: " + data.team.join(", "));
-            });
+                body: JSON.stringify({ team }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert("Team proposed: " + data.team.join(", "));
+                })
+                .catch((error) => alert("Error proposing team: " + error.message));
         }
 
         function voteTeam(vote) {
             fetch("/vote_team", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ vote: vote })
-            }).then(response => response.json()).then(data => {
-                alert("Vote submitted: " + vote);
-            });
+                body: JSON.stringify({ vote }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert(data.message);
+                })
+                .catch((error) => alert("Error voting: " + error.message));
         }
 
         function submitMissionResult(result) {
             fetch("/mission_result", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ result: result })
-            }).then(response => response.json()).then(data => {
-                alert("Mission result submitted. Next mission: " + data.next_mission);
-            });
+                body: JSON.stringify({ result }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert("Mission result submitted. Next mission: " + data.nextMission);
+                })
+                .catch((error) => alert("Error submitting mission result: " + error.message));
         }
     </script>
 </head>
 <body>
     <h1>Game On!</h1>
-    <h2>Welcome, {{ player.name }}!</h2>
-    <p>Your role: {{ player.role }}</p>
+    <h2>Welcome!</h2>
+    <p id="playerRole">Your role will be displayed here after the game starts.</p>
 
-    <h3>Current Mission: {{ game_state.current_mission }}</h3>
+    <h3>Current Mission</h3>
+    <p id="currentMission">Mission: 1</p>
 
     <h3>Propose a Team</h3>
     <input type="text" id="teamInput" placeholder="Enter player IDs separated by commas">
@@ -59,6 +69,5 @@
     <h3>Submit Mission Result</h3>
     <button onclick="submitMissionResult('pass')">Pass</button>
     <button onclick="submitMissionResult('fail')">Fail</button>
-    <script src="game.js"></script>
 </body>
 </html>
