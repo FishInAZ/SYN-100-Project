@@ -30,36 +30,23 @@ function initializeWebSocket() {
 
 // Handle incoming WebSocket messages
 function handleWebSocketMessage(data) {
-    if (data.type === "chatMessage") {
-        // Display chat message
-        displayMessage(data.payload.sender, data.payload.message);
-    } else if (data.type === "playerJoined") {
+    if (data.type === "playerJoined") {
         addPlayerToList(data.payload.playerName);
     }
-}
-
-// Function to display a chat message in the chat container
-function displayMessage(sender, message) {
-    const chatBox = document.getElementById("chatBox");
-    const messageElement = document.createElement("div");
-    messageElement.classList.add("chat-message");
-    messageElement.innerText = `${sender}: ${message}`;
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
 }
 
 // Add player to the list and update the UI
 function addPlayerToList(playerName) {
     if (players.length < maxPlayers && !players.includes(playerName)) {
-        players.push(playerName);
+        players.push(playerName); // Add player to the array
         const playerList = document.getElementById("playerList");
         const playerItem = document.createElement("li");
         playerItem.innerText = playerName;
         playerList.appendChild(playerItem);
 
-        // Check if maxPlayers have joined
+        // Enable "Start Game" button if 5 players have joined
         if (players.length === maxPlayers) {
-            document.getElementById("startGameBtn").disabled = false; // Enable Start Game button
+            document.getElementById("startGameBtn").disabled = false; // Enable the button
         }
     }
 }
@@ -69,16 +56,21 @@ document.getElementById("joinForm").addEventListener("submit", (e) => {
     e.preventDefault(); // Prevent form submission
     const playerNameInput = document.getElementById("player_name");
     const playerName = playerNameInput.value.trim();
-    if (playerName) {
-        // Send playerJoined message to WebSocket server
+    if (playerName && !players.includes(playerName)) {
+        // Immediately add the player to the UI
+        addPlayerToList(playerName);
+
+        // Notify the server that a new player has joined
         ws.send(JSON.stringify({
             type: "playerJoined",
             room: roomID,
             payload: { playerName }
         }));
+
         playerNameInput.value = ""; // Clear the input field
+        document.getElementById("errorMessage").innerText = ""; // Clear error message
     } else {
-        document.getElementById("errorMessage").innerText = "Please enter a valid name.";
+        document.getElementById("errorMessage").innerText = "Please enter a unique name.";
     }
 });
 
