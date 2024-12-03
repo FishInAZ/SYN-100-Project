@@ -61,5 +61,11 @@ document.getElementById("sendChatBtn").addEventListener("click", () => {
     }
 });
 
+// Add event listener to the "Start Game" button
+document.getElementById("startGameBtn").addEventListener("click", () => {
+    // Redirect to game.html
+    window.location.href = "game.html";
+});
+
 // Initialize WebSocket connection
 initializeWebSocket();
