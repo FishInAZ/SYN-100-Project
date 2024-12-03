@@ -78,6 +78,7 @@ document.getElementById("joinForm").addEventListener("submit", (e) => {
 document.getElementById("startGameBtn").addEventListener("click", () => {
     if (players.length === maxPlayers) {
         // Redirect to game.html
+        sessionStorage.setItem("players", JSON.stringify(players));
         window.location.href = "game.html";
     } else {
         alert(`Waiting for ${maxPlayers - players.length} more players to join.`);

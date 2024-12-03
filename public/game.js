@@ -1,125 +1,190 @@
-let players = [];
-const maxPlayers = 5;
-
+// Avalon roles
 const roles = [
-    "National Parks Conservation Association (NPCA) Representative",
-    "American Hiking Society (AKS) Representative",
-    "Traveler",
-    "ExxonMobil Representative",
-    "Chevron Representative",
-];
-
-let gameState = {
-    missionLeaderIndex: 0,
-    numFailedMissions: 0,
-    numSucceededMissions: 0,
-    currentMission: 1,
-    NPCAhead: null, // For endgame guessing
-    proposedTeam: [], // Stores the current proposed team
-};
-
-export default function handler(req, res) {
-    if (req.method === 'POST') {
-        const url = req.url;
-        const { body } = req;
-
-        if (url === '/api/game') {
-            handleJoinGame(body, res);
-        } else if (url === '/api/game/start') {
-            handleStartGame(res);
-        } else if (url === '/propose_team') {
-            handleProposeTeam(body, res);
-        } else if (url === '/vote_team') {
-            handleVoteTeam(body, res);
-        } else if (url === '/mission_result') {
-            handleMissionResult(body, res);
-        } else {
-            res.status(404).json({ error: 'Endpoint not found.' });
-        }
-    } else {
-        res.status(405).json({ error: 'Method not allowed.' });
+    "Merlin",
+    "Assassin",
+    "Loyal Servant of Arthur",
+    "Loyal Servant of Arthur",
+    "Minion of Mordred",
+    "Percival",
+    "Morgana",
+  ];
+  
+  // Get players from sessionStorage
+  const players = JSON.parse(sessionStorage.getItem("players")) || [];
+  
+  // Shuffle array helper function
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
-}
-
-// Handle player joining
-function handleJoinGame(body, res) {
-    const { name } = body;
-    if (!name) return res.status(400).json({ error: 'Name is required.' });
-    if (players.find(player => player.name === name))
-        return res.status(400).json({ error: 'Player already joined.' });
-    if (players.length >= maxPlayers)
-        return res.status(400).json({ error: 'Game is full.' });
-
-    players.push({ name });
-    res.status(200).json({ players });
-}
-
-// Handle game start
-function handleStartGame(res) {
-    if (players.length !== maxPlayers)
-        return res.status(400).json({ error: 'Not enough players to start the game.' });
-
-    // Assign roles to players
-    const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
-    players = players.map((player, index) => ({
-        ...player,
-        role: shuffledRoles[index],
+  }
+  
+  // Assign roles to players
+  function assignRoles(players) {
+    const shuffledRoles = roles.slice(0, players.length);
+    shuffleArray(shuffledRoles);
+    return players.map((player, index) => ({
+      name: player,
+      role: shuffledRoles[index],
+      team:
+        shuffledRoles[index].includes("Minion") ||
+        shuffledRoles[index] === "Morgana" ||
+        shuffledRoles[index] === "Assassin"
+          ? "bad"
+          : "good",
     }));
-
-    res.status(200).json({
-        message: 'Game started!',
-        players: players.map(player => ({ name: player.name, role: player.role })),
+  }
+  
+  // Game state variables
+  const playerRoles = assignRoles(players);
+  let currentPlayerIndex = 0;
+  let currentQuestIndex = 0;
+  let goodWins = 0;
+  let badWins = 0;
+  let questVotes = [];
+  let questTeam = [];
+  let assassinGuessed = false;
+  
+  // DOM Elements
+  const roleDisplay = document.getElementById("role-display");
+  const questOutcome = document.getElementById("quest-outcome");
+  const nextButton = document.getElementById("next-button");
+  const approveButton = document.getElementById("approve-button");
+  const rejectButton = document.getElementById("reject-button");
+  const startQuestButton = document.getElementById("start-quest-button");
+  
+  // Show the next player's role
+  function showNextRole() {
+    if (currentPlayerIndex < playerRoles.length) {
+      const currentPlayer = playerRoles[currentPlayerIndex];
+      roleDisplay.textContent = `${currentPlayer.name}, your role is: ${currentPlayer.role}`;
+      currentPlayerIndex++;
+      nextButton.textContent =
+        currentPlayerIndex < playerRoles.length ? "Next" : "Assign Quests";
+    } else {
+      roleDisplay.textContent = "Roles assigned! Start assigning quests.";
+      nextButton.classList.add("hidden");
+      startQuestButton.classList.remove("hidden");
+    }
+  }
+  
+  // Assign players to a quest
+  function assignQuest() {
+    questOutcome.classList.add("hidden");
+    questVotes = [];
+    questTeam = players.slice(0, 2); // Change the number of players per quest as needed
+    roleDisplay.textContent = `Quest ${currentQuestIndex + 1}: Team members are ${questTeam.join(
+      ", "
+    )}`;
+    currentPlayerIndex = 0; // Reset index for voting
+    nextPlayerVote();
+  }
+  
+  // Handle quest voting
+  function nextPlayerVote() {
+    if (currentPlayerIndex < questTeam.length) {
+      const currentPlayer = playerRoles.find(
+        (player) => player.name === questTeam[currentPlayerIndex]
+      );
+  
+      if (currentPlayer.team === "good") {
+        // Good players can only approve the quest
+        questVotes.push(true);
+        currentPlayerIndex++;
+        nextPlayerVote(); // Automatically move to the next player
+      } else {
+        // Bad players choose to approve or reject
+        roleDisplay.textContent = `${currentPlayer.name}, you are on the bad team. Do you approve or reject the quest?`;
+        approveButton.classList.remove("hidden");
+        rejectButton.classList.remove("hidden");
+      }
+    } else {
+      // All votes collected
+      tallyVotes();
+    }
+  }
+  
+  // Handle bad team votes
+  function handleBadVote(approve) {
+    questVotes.push(approve);
+    approveButton.classList.add("hidden");
+    rejectButton.classList.add("hidden");
+    currentPlayerIndex++;
+    nextPlayerVote();
+  }
+  
+  // Tally votes and determine quest outcome
+  function tallyVotes() {
+    const approves = questVotes.filter((vote) => vote).length;
+  
+    // Quest succeeds if all members approve
+    if (approves === questTeam.length) {
+      goodWins++;
+      questOutcome.textContent = `Quest ${currentQuestIndex + 1} succeeded!`;
+    } else {
+      badWins++;
+      questOutcome.textContent = `Quest ${currentQuestIndex + 1} failed!`;
+    }
+  
+    questOutcome.classList.remove("hidden");
+    currentQuestIndex++;
+  
+    if (currentQuestIndex >= 5) {
+      endGame();
+    } else {
+      startQuestButton.textContent = "Assign New Quest";
+      startQuestButton.classList.remove("hidden");
+    }
+  }
+  
+  // End game logic
+  function endGame() {
+    startQuestButton.classList.add("hidden");
+  
+    if (goodWins > badWins) {
+      roleDisplay.textContent =
+        "Good team wins! Assassin, guess who Merlin is.";
+      assassinGuessPhase();
+    } else {
+      roleDisplay.textContent = "Bad team wins!";
+    }
+  }
+  
+  // Assassin's guess logic
+  function assassinGuessPhase() {
+    const assassin = playerRoles.find((player) => player.role === "Assassin");
+    const merlin = playerRoles.find((player) => player.role === "Merlin");
+  
+    roleDisplay.textContent = `${assassin.name}, you are the Assassin. Guess who Merlin is.`;
+  
+    // Display players for the Assassin to guess
+    const playersList = document.createElement("ul");
+    players.forEach((player) => {
+      const listItem = document.createElement("li");
+      listItem.textContent = player;
+      listItem.style.cursor = "pointer";
+      listItem.addEventListener("click", () => {
+        if (player === merlin.name) {
+          questOutcome.textContent =
+            "The Assassin guessed correctly! Bad team wins!";
+        } else {
+          questOutcome.textContent =
+            "The Assassin guessed incorrectly! Good team wins!";
+        }
+        roleDisplay.textContent = "Game Over!";
+        assassinGuessed = true;
+        playersList.remove();
+      });
+      playersList.appendChild(listItem);
     });
-}
-
-// Handle proposing a team
-function handleProposeTeam(body, res) {
-    const { team } = body;
-    if (!team || !Array.isArray(team) || team.length === 0)
-        return res.status(400).json({ error: 'Invalid team proposed.' });
-
-    gameState.proposedTeam = team;
-    res.status(200).json({ message: 'Team proposed successfully!', team });
-}
-
-// Handle voting on a team
-function handleVoteTeam(body, res) {
-    const { vote } = body;
-    if (!vote || !['approve', 'reject'].includes(vote))
-        return res.status(400).json({ error: 'Invalid vote.' });
-
-    // Simulate voting results for simplicity
-    const approveVotes = Math.floor(Math.random() * (players.length + 1));
-    const rejectVotes = players.length - approveVotes;
-
-    if (approveVotes > rejectVotes) {
-        res.status(200).json({ message: 'Team approved!' });
-    } else {
-        gameState.missionLeaderIndex = (gameState.missionLeaderIndex + 1) % players.length;
-        res.status(200).json({ message: 'Team rejected. Next leader assigned.' });
-    }
-}
-
-// Handle mission result submission
-function handleMissionResult(body, res) {
-    const { result } = body;
-    if (!result || !['pass', 'fail'].includes(result))
-        return res.status(400).json({ error: 'Invalid mission result.' });
-
-    if (result === 'fail') {
-        gameState.numFailedMissions++;
-    } else {
-        gameState.numSucceededMissions++;
-    }
-
-    // Check for victory
-    if (gameState.numFailedMissions === 3) {
-        return res.status(200).json({ message: 'Corporate Interests win!' });
-    }
-    if (gameState.numSucceededMissions === 3) {
-        return res.status(200).json({ message: 'Green Detectives win the missions!' });
-    }
-
-    gameState.currentMission++;
-    res.status(200).json({ message: 'Mission result submitted.', nextMission: gameState.currentMission });
-}
+  
+    document.body.appendChild(playersList);
+  }
+  
+  // Event listeners
+  nextButton.addEventListener("click", showNextRole);
+  approveButton.addEventListener("click", () => handleBadVote(true));
+  rejectButton.addEventListener("click", () => handleBadVote(false));
+  startQuestButton.addEventListener("click", assignQuest);
+  

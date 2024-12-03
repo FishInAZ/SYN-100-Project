@@ -1,73 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Game</title>
-    <script>
-        function proposeTeam() {
-            const team = document.getElementById("teamInput").value.split(",").map(item => item.trim());
-            fetch("/propose_team", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ team }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert("Team proposed: " + data.team.join(", "));
-                })
-                .catch((error) => alert("Error proposing team: " + error.message));
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avalon Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
 
-        function voteTeam(vote) {
-            fetch("/vote_team", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ vote }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert(data.message);
-                })
-                .catch((error) => alert("Error voting: " + error.message));
-        }
+    #approve-button,
+    #reject-button,
+    #start-quest-button,
+    #next-button {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        function submitMissionResult(result) {
-            fetch("/mission_result", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ result }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert("Mission result submitted. Next mission: " + data.nextMission);
-                })
-                .catch((error) => alert("Error submitting mission result: " + error.message));
-        }
-    </script>
+    #approve-button:hover,
+    #reject-button:hover,
+    #start-quest-button:hover,
+    #next-button:hover {
+      background-color: #0056b3;
+    }
+
+    #quest-outcome {
+      font-size: 1.2rem;
+      margin: 20px;
+      color: #333;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    ul li {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    ul li:hover {
+      background-color: #ddd;
+    }
+
+    #role-display {
+      font-size: 1.5rem;
+      margin: 20px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Game On!</h1>
-    <h2>Welcome!</h2>
-    <p id="playerRole">Your role will be displayed here after the game starts.</p>
+  <h1>Avalon Game</h1>
 
-    <h3>Current Mission</h3>
-    <p id="currentMission">Mission: 1</p>
+  <!-- Role display area -->
+  <div id="role-display">Welcome to Avalon!</div>
 
-    <h3>Propose a Team</h3>
-    <input type="text" id="teamInput" placeholder="Enter player IDs separated by commas">
-    <button onclick="proposeTeam()">Propose Team</button>
+  <!-- Buttons for progressing the game -->
+  <button id="next-button">Next</button>
+  <button id="start-quest-button" class="hidden">Start Quest</button>
 
-    <h3>Vote on Proposed Team</h3>
-    <button onclick="voteTeam('approve')">Approve</button>
-    <button onclick="voteTeam('reject')">Reject</button>
+  <!-- Voting buttons -->
+  <button id="approve-button" class="hidden">Approve</button>
+  <button id="reject-button" class="hidden">Reject</button>
 
-    <h3>Submit Mission Result</h3>
-    <button onclick="submitMissionResult('pass')">Pass</button>
-    <button onclick="submitMissionResult('fail')">Fail</button>
+  <!-- Quest outcome display -->
+  <div id="quest-outcome" class="hidden"></div>
+
+  <script src="game.js"></script>
 </body>
 </html>
