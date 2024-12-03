@@ -96,6 +96,24 @@
         .start-game-btn:hover {
             background-color: #45a049;
         }
+
+        .start-game-btn:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        #playerList {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -104,12 +122,13 @@
             <h1>Game Lobby</h1>
             <p>Game ID: 12345</p>
             <h2>Players Joined:</h2>
+            <ul id="playerList"></ul> <!-- Placeholder for the player list -->
             <form id="joinForm">
                 <label for="player_name">Enter Your Name:</label>
                 <input type="text" id="player_name" name="player_name" required>
                 <button type="submit">Join Game</button>
             </form>
-            <button class="start-game-btn" id="startGameBtn">Start Game</button>
+            <button class="start-game-btn" id="startGameBtn" disabled>Start Game</button>
             <div class="error-message" id="errorMessage"></div>
         </div>
 

@@ -1,6 +1,8 @@
 // WebSocket connection
 let ws = null;
-const roomID = "12345"; // Example Room ID (you can generate dynamically if needed)
+const roomID = "SYN 100";
+const maxPlayers = 5;
+let players = []; // Array to keep track of joined players
 
 // Establish WebSocket connection
 function initializeWebSocket() {
@@ -32,7 +34,7 @@ function handleWebSocketMessage(data) {
         // Display chat message
         displayMessage(data.payload.sender, data.payload.message);
     } else if (data.type === "playerJoined") {
-        console.log(`${data.payload.playerName} joined the game.`);
+        addPlayerToList(data.payload.playerName);
     }
 }
 
@@ -46,25 +48,48 @@ function displayMessage(sender, message) {
     chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
 }
 
-// Event listener for the chat send button
-document.getElementById("sendChatBtn").addEventListener("click", () => {
-    const chatMessageInput = document.getElementById("chatMessage");
-    const message = chatMessageInput.value.trim();
-    if (message) {
-        // Send chat message to WebSocket server
+// Add player to the list and update the UI
+function addPlayerToList(playerName) {
+    if (players.length < maxPlayers && !players.includes(playerName)) {
+        players.push(playerName);
+        const playerList = document.getElementById("playerList");
+        const playerItem = document.createElement("li");
+        playerItem.innerText = playerName;
+        playerList.appendChild(playerItem);
+
+        // Check if maxPlayers have joined
+        if (players.length === maxPlayers) {
+            document.getElementById("startGameBtn").disabled = false; // Enable Start Game button
+        }
+    }
+}
+
+// Event listener for the "Join Game" form
+document.getElementById("joinForm").addEventListener("submit", (e) => {
+    e.preventDefault(); // Prevent form submission
+    const playerNameInput = document.getElementById("player_name");
+    const playerName = playerNameInput.value.trim();
+    if (playerName) {
+        // Send playerJoined message to WebSocket server
         ws.send(JSON.stringify({
-            type: "chatMessage",
+            type: "playerJoined",
             room: roomID,
-            payload: { sender: "Player", message } // Replace "Player" with actual player name
+            payload: { playerName }
         }));
-        chatMessageInput.value = ""; // Clear input field
+        playerNameInput.value = ""; // Clear the input field
+    } else {
+        document.getElementById("errorMessage").innerText = "Please enter a valid name.";
     }
 });
 
-// Add event listener to the "Start Game" button
+// Event listener for the "Start Game" button
 document.getElementById("startGameBtn").addEventListener("click", () => {
-    // Redirect to game.html
-    window.location.href = "game.html";
+    if (players.length === maxPlayers) {
+        // Redirect to game.html
+        window.location.href = "game.html";
+    } else {
+        alert(`Waiting for ${maxPlayers - players.length} more players to join.`);
+    }
 });
 
 // Initialize WebSocket connection
