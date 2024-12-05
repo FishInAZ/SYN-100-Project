@@ -145,17 +145,53 @@ const roles = [
     });
   }
   
+  // Event listener for the "Start Mission" button
+  startMissionButton.addEventListener("click", () => {
+    if (selectedTeam.length > 0) {
+      roleDisplay.textContent = `Team selected: ${selectedTeam.join(", ")}. Vote to approve or reject this team.`;
+      startMissionButton.classList.add("hidden");
+      approveButton.classList.remove("hidden");
+      rejectButton.classList.remove("hidden");
+      currentPlayerIndex = 0; // Reset player index for voting
+    } else {
+      alert("Please select a team before starting the mission.");
+    }
+  });
+  
   // Handle mission voting
   function voteForMission() {
-    roleDisplay.textContent = `${playerRoles[currentPlayerIndex].name}, vote to approve or reject this mission.`;
-    approveButton.classList.remove("hidden");
-    rejectButton.classList.remove("hidden");
+    if (currentPlayerIndex < playerRoles.length) {
+      const currentPlayer = playerRoles[currentPlayerIndex];
+      roleDisplay.textContent = `${currentPlayer.name}, vote to approve or reject this team.`;
+      approveButton.classList.remove("hidden");
+      rejectButton.classList.remove("hidden");
+    } else {
+      // All votes have been cast; tally them
+      tallyVotes();
+    }
   }
   
-  // Handle mission outcome
-  function handleMissionOutcome() {
-    const success = selectedTeam.every((playerName) => {
-      const player = playerRoles.find((p) => p.name === playerName);
+  function tallyVotes() {
+    const approves = votes.filter(vote => vote).length;
+    if (approves > votes.length / 2) {
+      roleDisplay.textContent = `Team approved! Proceeding with the mission.`;
+      executeMission();
+    } else {
+      roleDisplay.textContent = `Team rejected. Assigning a new leader.`;
+      teamProposalsRejected++;
+      if (teamProposalsRejected >= 5) {
+        roleDisplay.textContent = "Five team proposals rejected. Corporate Interests win!";
+        return;
+      }
+      currentLeaderIndex = (currentLeaderIndex + 1) % playerRoles.length;
+      assignMission();
+    }
+  }
+  
+  // Execute mission logic
+  function executeMission() {
+    const success = selectedTeam.every(playerName => {
+      const player = playerRoles.find(p => p.name === playerName);
       return player.team === "Green Detectives";
     });
   
@@ -167,7 +203,9 @@ const roles = [
       missionOutcome.textContent = `Mission ${currentMissionIndex + 1} failed!`;
     }
   
+    missionOutcome.classList.remove("hidden");
     currentMissionIndex++;
+  
     if (greenDetectivesWins === 3) {
       handleChevronSpecial();
     } else if (corporateInterestsWins === 3 || currentMissionIndex === 5) {
@@ -196,15 +234,16 @@ const roles = [
     }
   }
   
-  // Event listeners
-  nextButton.addEventListener("click", showNextRole);
-  startMissionButton.addEventListener("click", voteForMission);
+  // Event listeners for voting
   approveButton.addEventListener("click", () => {
     votes.push(true);
-    tallyVotes();
+    currentPlayerIndex++;
+    voteForMission();
   });
+  
   rejectButton.addEventListener("click", () => {
     votes.push(false);
-    tallyVotes();
+    currentPlayerIndex++;
+    voteForMission();
   });
   
