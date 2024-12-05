@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avalon Game</title>
+  <title>The Green Detective Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,10 +10,7 @@
       text-align: center;
     }
 
-    #approve-button,
-    #reject-button,
-    #start-quest-button,
-    #next-button {
+    button {
       margin: 10px;
       padding: 10px 20px;
       background-color: #007bff;
@@ -24,35 +20,31 @@
       cursor: pointer;
     }
 
-    #approve-button:hover,
-    #reject-button:hover,
-    #start-quest-button:hover,
-    #next-button:hover {
+    button:hover {
       background-color: #0056b3;
     }
 
-    #quest-outcome {
+    .hidden {
+      display: none;
+    }
+
+    #mission-outcome {
       font-size: 1.2rem;
       margin: 20px;
       color: #333;
     }
 
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    ul li {
-      display: inline-block;
+    #players-list > div {
       margin: 5px;
       padding: 10px;
       background-color: #f0f0f0;
       border: 1px solid #ccc;
       cursor: pointer;
       border-radius: 5px;
+      display: inline-block;
     }
 
-    ul li:hover {
+    #players-list > div:hover {
       background-color: #ddd;
     }
 
@@ -63,21 +55,21 @@
   </style>
 </head>
 <body>
-  <h1>The Green Detective</h1>
+  <h1>The Green Detective Game</h1>
 
   <!-- Role display area -->
-  <div id="role-display">Welcome to Green Detective!</div>
+  <div id="role-display">Welcome to The Green Detective!</div>
 
   <!-- Buttons for progressing the game -->
   <button id="next-button">Next</button>
-  <button id="start-quest-button" class="hidden">Start Quest</button>
+  <button id="start-mission-button" class="hidden">Start Mission</button>
 
   <!-- Voting buttons -->
   <button id="approve-button" class="hidden">Approve</button>
   <button id="reject-button" class="hidden">Reject</button>
 
-  <!-- Quest outcome display -->
-  <div id="quest-outcome" class="hidden"></div>
+  <!-- Mission outcome display -->
+  <div id="mission-outcome" class="hidden"></div>
 
   <!-- Player list for leader to select team members -->
   <div id="players-list"></div>
