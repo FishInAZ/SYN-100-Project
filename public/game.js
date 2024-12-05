@@ -35,7 +35,7 @@ const roles = [
   // Validate the number of players
   if (players.length !== 5) {
     alert("Exactly 5 players are required to start the game.");
-    window.location.href = "index.html"; // Redirect back to the table page
+    window.location.href = "table.html"; // Redirect back to the table page
   }
   
   // Shuffle array helper function
@@ -145,12 +145,39 @@ const roles = [
     });
   }
   
+  function tallyVotes() {
+    console.log("Tallying votes..."); // Debugging log
+    const approves = votes.filter(vote => vote).length;
+  
+    if (approves > votes.length / 2) {
+      roleDisplay.textContent = `Team approved! Proceeding with the mission.`;
+      executeMission();
+    } else {
+      roleDisplay.textContent = `Team rejected. Assigning a new leader.`;
+      teamProposalsRejected++;
+      if (teamProposalsRejected >= 5) {
+        roleDisplay.textContent = "Five team proposals rejected. Corporate Interests win!";
+        return;
+      }
+      currentLeaderIndex = (currentLeaderIndex + 1) % playerRoles.length;
+      assignMission();
+    }
+  }
+  
   // Handle mission voting
   function voteForMission() {
-    roleDisplay.textContent = `${playerRoles[currentPlayerIndex].name}, vote to approve or reject this mission.`;
-    approveButton.classList.remove("hidden");
-    rejectButton.classList.remove("hidden");
+    console.log("Entering voting phase..."); // Debugging log
+    if (currentPlayerIndex < playerRoles.length) {
+      const currentPlayer = playerRoles[currentPlayerIndex];
+      roleDisplay.textContent = `${currentPlayer.name}, vote to approve or reject this team.`;
+      approveButton.classList.remove("hidden");
+      rejectButton.classList.remove("hidden");
+    } else {
+      // All votes have been cast; tally them
+      tallyVotes();
+    }
   }
+  
   
   // Handle mission outcome
   function handleMissionOutcome() {
@@ -198,7 +225,23 @@ const roles = [
   
   // Event listeners
   nextButton.addEventListener("click", showNextRole);
-  startMissionButton.addEventListener("click", voteForMission);
+  // Event listener for the "Start Mission" button
+  startMissionButton.addEventListener("click", () => {
+    if (selectedTeam.length > 0) {
+      // Proceed to the voting phase
+      console.log("Start Mission button clicked. Proceeding to vote for the mission."); // Debugging log
+      roleDisplay.textContent = `Team selected: ${selectedTeam.join(", ")}. Vote to approve or reject this team.`;
+      startMissionButton.classList.add("hidden"); // Hide the button after starting the mission
+      approveButton.classList.remove("hidden");
+      rejectButton.classList.remove("hidden");
+      currentPlayerIndex = 0; // Reset player index for voting
+      votes = []; // Reset votes array
+      voteForMission(); // Call the voting function
+    } else {
+      alert("Please select a team before starting the mission.");
+    }
+  });
+
   approveButton.addEventListener("click", () => {
     votes.push(true);
     tallyVotes();
