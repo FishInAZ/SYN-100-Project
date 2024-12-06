@@ -2,22 +2,22 @@
 const roles = [
   {
     name: "National Parks Conservation Association (NPCA) Representative",
-    description: "A special Green Detective",
+    description: "A special Green Detective.",
     team: "Green Detectives",
   },
   {
     name: "American Hiking Society (AKS) Representative",
-    description: "A special Green Detective",
+    description: "A special Green Detective.",
     team: "Green Detectives",
   },
   {
     name: "Traveler",
-    description: "A Green Detective. No extra information.",
+    description: "A Green Detective",
     team: "Green Detectives",
   },
   {
     name: "ExxonMobil Representative",
-    description: "A Corporate Interest. No extra information.",
+    description: "A Corporate Interest",
     team: "Corporate Interests",
   },
   {
